@@ -108,19 +108,8 @@
 </div>
 
 <div class="bar" id="right">
-  <button class="btn primary" id="connect" title="Connect a shared folder (Chrome/Edge)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
-    Connect folder
-  </button>
-  <span class="chip" id="chanchip" title="Your channel — click to switch"><span class="sw"></span><span id="channame"></span></button>
-  <button class="btn primary" id="syncnow" title="Synchronise now (auto-runs too)" style="display:none">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9 9 0 0 0-6.7 3M3 12a9 9 0 0 0 9 9 9 9 0 0 0 6.7-3"/><path d="M21 3v6h-6M3 21v-6h6"/></svg>
-    Synchronise
-  </button>
-  <span class="sep"></span>
-  <button class="btn" id="exp" title="Export my channel as JSON">Export</button>
-  <button class="btn" id="imp" title="Import a JSON layer">Import</button>
-  <button class="btn" id="rename" title="Change my name">Name</button>
+  <span class="chip" id="chanchip" title="Your seat — click to switch"><span class="sw"></span><span id="channame"></span></span>
+  <button class="btn" id="switchbtn" title="Pick or switch seat">Join board</button>
 </div>
 
 <div class="hint">Drop images anywhere · draw with the pen · scroll to zoom · Space-drag to pan</div>
@@ -128,18 +117,23 @@
 
 <div class="overlay" id="overlay">
   <div class="modal">
-    <h2>Pick your channel</h2>
-    <p>You can edit <b>one</b> channel. Everyone else's channels stay visible but read-only. Pick an empty one, or create your own.</p>
-    <div id="chanlist"></div>
-    <div class="row">
-      <input type="text" id="newchan" placeholder="New channel name (e.g. your name)">
-      <button class="btn primary" id="createchan">Create</button>
+    <h2 id="mtitle">Join the board</h2>
+    <p id="mdesc">Pick a free seat to start. Busy seats are in use right now; when someone leaves, their seat frees up.</p>
+    <div id="folderpick" style="display:none">
+      <button class="btn primary" id="pickfolder" style="justify-content:center;width:100%;height:44px;font-size:14px">Select shared folder</button>
+      <p style="color:#6b7280;font-size:12px;margin:10px 0 0">Everyone chooses the <b>same</b> folder (a shared or cloud-synced folder). Chrome or Edge.</p>
+    </div>
+    <div id="seatwrap">
+      <div id="chanlist"></div>
+      <div class="row">
+        <input type="text" id="newchan" placeholder="New seat name (e.g. your name)">
+        <button class="btn primary" id="createchan">Create</button>
+      </div>
     </div>
   </div>
 </div>
 
 <input type="file" id="fileImg" accept="image/*" multiple hidden>
-<input type="file" id="fileJson" accept="application/json,.json" hidden>
 
 <script>
 (function(){
@@ -168,7 +162,9 @@
   var view = { s:1, tx:0, ty:0 };
   var tool='select', color='#111827', width=3, sel=null;
   var imgCache={}, undoStack=[];
-  var dirHandle=null, scanning=false, folderIndex={}, parsedCache={}, pendingResume=false;
+  var dirHandle=null, scanning=false, folderIndex={}, parsedCache={};
+  var presenceMap={};            // seatLabel -> { user, t }  (live-presence heartbeats)
+  var PRES_TTL=8000;             // a seat is "busy" only if its heartbeat is newer than this
 
   function allObjects(){
     var out = mine.slice();
@@ -210,10 +206,14 @@
   }
   // read every board-*.json into folderIndex; returns it
   async function readAll(){
-    var idx={};
+    var idx={}, pres={};
     for await (var entry of dirHandle.values()){
-      if(entry.kind!=='file' || !/^board-.+\.json$/i.test(entry.name)) continue;
+      if(entry.kind!=='file') continue;
       var fn=entry.name;
+      var pm=fn.match(/^presence-(.+)\.json$/i);
+      if(pm){ try{ var pf=await entry.getFile(); var pd=JSON.parse(await pf.text());
+        pres[pd.slot||pm[1]]={ user:pd.user||pm[1], t:pd.t||0 }; }catch(e){} continue; }
+      if(!/^board-.+\.json$/i.test(fn)) continue;
       try{
         var f=await entry.getFile();
         var cached=parsedCache[fn];
@@ -224,7 +224,7 @@
         idx[fn]=rec;
       }catch(e){ idx[fn]={ user:chanLabel(fn), objects:[] }; }
     }
-    folderIndex=idx; return idx;
+    folderIndex=idx; presenceMap=pres; return idx;
   }
   async function syncNow(pushFirst){
     if(!dirHandle||scanning) return; scanning=true;
@@ -238,33 +238,39 @@
     finally{ scanning=false; }
   }
 
-  async function connectFolder(){
-    if(!window.showDirectoryPicker){
-      alert('Folder sync needs Chrome or Edge.\nOn Safari/Firefox use Export / Import instead.');
-      return;
+  // Get a usable folder handle: reuse the remembered one (re-granting if needed),
+  // else let the user pick one. Then refresh the seat picker.
+  async function ensureFolder(){
+    var h=await idbGet('dirHandle');
+    if(h){
+      try{
+        var perm = h.queryPermission ? await h.queryPermission({mode:'readwrite'}) : 'granted';
+        if(perm!=='granted' && h.requestPermission) perm = await h.requestPermission({mode:'readwrite'});
+        if(perm==='granted'){ dirHandle=h; await readAll(); renderPicker(); return; }
+      }catch(e){}
     }
+    if(!window.showDirectoryPicker){ alert('Folder sync needs Chrome or Edge.'); return; }
     try{
       dirHandle=await window.showDirectoryPicker({ mode:'readwrite', id:'localboard' });
       if(dirHandle.requestPermission){ var p=await dirHandle.requestPermission({mode:'readwrite'}); if(p!=='granted'){ dirHandle=null; return; } }
-      idbSet('dirHandle', dirHandle);   // remember folder so we can auto-reconnect on reload
-      await readAll();
-      if(myChannel && folderIndex[myChannel]){ adoptChannel(myChannel, true); startSync(); }
-      else openChannelPicker();
+      idbSet('dirHandle', dirHandle);   // remember folder for next time
+      await readAll(); renderPicker();
     }catch(e){ /* cancelled */ }
   }
-  // Reconnect to the remembered folder without re-picking it.
-  async function resumeFolder(){
-    var h=await idbGet('dirHandle'); if(!h) return connectFolder();
+
+  // presence heartbeat — tiny file, written every few seconds while my tab is open
+  async function writePresence(){
+    if(!dirHandle||!myChannel) return;
     try{
-      var p = h.requestPermission ? await h.requestPermission({mode:'readwrite'}) : 'granted';
-      if(p!=='granted'){ pendingResume=true; return; }
-      dirHandle=h; await readAll();
-      if(myChannel && folderIndex[myChannel]){ adoptChannel(myChannel, true); startSync(); }
-      else openChannelPicker();
-    }catch(e){ connectFolder(); }
+      var name='presence-'+safe(chanLabel(myChannel))+'.json';
+      var hh=await dirHandle.getFileHandle(name,{create:true}); var w=await hh.createWritable();
+      await w.write(new Blob([JSON.stringify({ user:me, slot:chanLabel(myChannel), t:Date.now() })],{type:'application/json'})); await w.close();
+    }catch(e){}
   }
-  function armResume(){ pendingResume=true; var b=document.getElementById('connect');
-    var tn=b.childNodes[b.childNodes.length-1]; if(tn) tn.nodeValue=' Resume sync'; }
+  async function freeSeat(){   // best-effort release when leaving (TTL frees it anyway)
+    if(!dirHandle||!myChannel) return;
+    try{ await dirHandle.removeEntry('presence-'+safe(chanLabel(myChannel))+'.json'); }catch(e){}
+  }
 
   function adoptChannel(fn, keepMineIfNew){
     myChannel=fn; localStorage.setItem('lb_channel', fn);
@@ -275,57 +281,79 @@
     var sw=document.querySelector('#chanchip .sw'); if(sw) sw.style.background=hueColor(me);
     document.getElementById('channame').textContent=chanLabel(fn);
     document.getElementById('chanchip').style.display='inline-flex';
-    document.getElementById('syncnow').style.display='inline-flex';
-    document.getElementById('connect').style.display='none';
+    document.getElementById('switchbtn').textContent='Switch seat';
     saveLocal(); render(); updatePeers();
   }
   function startSync(){
     setSyncUI(true);
     if(!window._lbPoll) window._lbPoll=setInterval(function(){ syncNow(false); }, 1000);
-    writeMine();
+    if(!window._lbBeat) window._lbBeat=setInterval(writePresence, 3000);
+    writePresence(); writeMine();
   }
   function setSyncUI(on){
     document.getElementById('syncdot').classList.toggle('live', !!on);
-    document.getElementById('status').textContent = on ? 'channel: '+chanLabel(myChannel) : 'local only';
+    document.getElementById('status').textContent = on ? 'seat: '+chanLabel(myChannel) : 'local only';
   }
   function flashSync(){ var d=document.getElementById('syncdot'); d.style.transform='scale(1.5)'; setTimeout(function(){ d.style.transform='scale(1)'; },150); }
 
-  // ---- channel picker modal --------------------------------------------
-  function openChannelPicker(){
+  // ---- seat picker modal ------------------------------------------------
+  function isLive(l){ return presenceMap[l] && (Date.now()-presenceMap[l].t < PRES_TTL); }
+  function openSeatPicker(){
+    document.getElementById('overlay').style.display='flex'; renderPicker();
+    if(!window._lbPick) window._lbPick=setInterval(function(){ if(dirHandle) readAll().then(renderPicker).catch(function(){}); }, 1500);
+  }
+  function closeModal(){ document.getElementById('overlay').style.display='none';
+    if(window._lbPick){ clearInterval(window._lbPick); window._lbPick=null; } }
+  function renderPicker(){
+    var fp=document.getElementById('folderpick'), sw=document.getElementById('seatwrap');
+    if(!dirHandle){ fp.style.display='block'; sw.style.display='none';
+      document.getElementById('mtitle').textContent='Join the board';
+      document.getElementById('mdesc').textContent='First, everyone selects the same shared folder.'; return; }
+    fp.style.display='none'; sw.style.display='block';
+    document.getElementById('mtitle').textContent='Pick your seat';
+    document.getElementById('mdesc').textContent='Busy seats are in use right now. When someone leaves, their seat frees up.';
     var list=document.getElementById('chanlist'); list.innerHTML='';
-    var names=Object.keys(folderIndex);
-    if(!names.length){ list.innerHTML='<p style="margin:0 0 8px">No channels yet — create the first one below.</p>'; }
-    names.forEach(function(fn){
-      var info=folderIndex[fn], empty=(info.objects||[]).length===0;
-      var el=document.createElement('button'); el.className='chan';
-      el.innerHTML='<span class="sw" style="background:'+hueColor(info.user||fn)+'"></span>'+
-        '<span class="meta"><span class="t">'+chanLabel(fn)+'</span><span class="s">'+
-        (empty?'empty':((info.objects.length)+' items')+' · last by '+(info.user||'?'))+'</span></span>'+
-        (empty?'':'<span class="taken">in use</span>');
-      el.addEventListener('click', function(){ closeModal(); adoptChannel(fn, false); startSync(); });
+    var myl=myChannel?chanLabel(myChannel):null, labels={};
+    Object.keys(folderIndex).forEach(function(fn){ labels[chanLabel(fn)]=true; });
+    for(var l in presenceMap) labels[l]=true;
+    var keys=Object.keys(labels).sort();
+    if(!keys.length){ list.innerHTML='<p style="color:#6b7280;font-size:13px;margin:0 0 8px">No seats yet — create the first one below.</p>'; }
+    keys.forEach(function(l){
+      var fn='board-'+l+'.json', info=folderIndex[fn], items=info?(info.objects||[]).length:0;
+      var live=isLive(l), occupant=(presenceMap[l]&&presenceMap[l].user)||(info&&info.user)||l, busy=live&&l!==myl;
+      var el=document.createElement('button'); el.className='chan'; el.disabled=!!busy;
+      if(busy){ el.style.opacity='.55'; el.style.cursor='not-allowed'; }
+      var tag = busy ? '<span class="taken">busy · '+occupant+'</span>'
+              : (l===myl ? '<span class="taken" style="background:#dcfce7;color:#166534">you</span>'
+                         : '<span class="taken" style="background:#eef2ff;color:#3730a3">free</span>');
+      el.innerHTML='<span class="sw" style="background:'+hueColor(occupant)+'"></span>'+
+        '<span class="meta"><span class="t">'+l+'</span><span class="s">'+(items?items+' items':'empty')+'</span></span>'+tag;
+      if(!busy) el.addEventListener('click', function(){ takeSeat(l); });
       list.appendChild(el);
     });
-    document.getElementById('overlay').style.display='flex';
   }
-  function closeModal(){ document.getElementById('overlay').style.display='none'; }
+  function takeSeat(l){ var fn='board-'+l+'.json'; if(myChannel&&myChannel!==fn) freeSeat(); closeModal(); adoptChannel(fn, true); startSync(); }
   document.getElementById('overlay').addEventListener('click', function(e){ if(e.target.id==='overlay' && myChannel) closeModal(); });
+  document.getElementById('pickfolder').addEventListener('click', ensureFolder);
   document.getElementById('createchan').addEventListener('click', function(){
-    var label=(document.getElementById('newchan').value||'').trim() || me;
-    var fn=chanFile(label);
-    var keep = !myChannel && mine.length>0;   // first-time: keep local sketches as this channel
+    if(!dirHandle){ ensureFolder(); return; }
+    var l=safe((document.getElementById('newchan').value||'').trim() || me);
+    if(isLive(l) && l!==(myChannel&&chanLabel(myChannel))){ alert('That seat is busy right now — pick another name.'); return; }
+    var fn='board-'+l+'.json', keep = !myChannel && mine.length>0;   // first time: keep local sketches as this seat
+    if(myChannel&&myChannel!==fn) freeSeat();
     if(!folderIndex[fn]) folderIndex[fn]={ user:me, objects: keep?mine:[] };
-    closeModal(); adoptChannel(fn, keep); startSync();
+    document.getElementById('newchan').value=''; closeModal(); adoptChannel(fn, keep); startSync();
   });
 
   function updatePeers(){
     var box=document.getElementById('peers');
-    if(!dirHandle && !Object.keys(others).length){ box.style.display='none'; return; }
-    var chans=Object.keys(others);
-    var total=chans.length+(myChannel?1:0);
-    var html='<b>'+total+'</b> channel'+(total===1?'':'s')+' on this board';
-    if(myChannel) html+='<div class="pw me"><span class="sw" style="background:'+hueColor(me)+'"></span>'+chanLabel(myChannel)+' — you</div>';
-    chans.forEach(function(fn){ var u=others[fn].user||chanLabel(fn);
-      html+='<div class="pw"><span class="sw" style="background:'+hueColor(u)+'"></span>'+chanLabel(fn)+' · '+u+'</div>'; });
+    if(!dirHandle){ box.style.display='none'; return; }
+    var myl=myChannel?chanLabel(myChannel):null, live=[];
+    for(var l in presenceMap){ if(isLive(l)) live.push(l); }
+    if(myl && live.indexOf(myl)<0) live.push(myl);
+    var html='<b>'+live.length+'</b> here now';
+    live.sort().forEach(function(l){ var mineSeat=(l===myl); var u=(presenceMap[l]&&presenceMap[l].user)||(mineSeat?me:l);
+      html+='<div class="pw'+(mineSeat?' me':'')+'"><span class="sw" style="background:'+hueColor(u)+'"></span>'+l+' · '+u+(mineSeat?' (you)':'')+'</div>'; });
     box.innerHTML=html; box.style.display='block';
   }
 
@@ -440,20 +468,9 @@
   document.getElementById('del').addEventListener('click',delSel);
   document.getElementById('undo').addEventListener('click',undo);
   document.getElementById('fit').addEventListener('click',fit);
-  document.getElementById('connect').addEventListener('click',function(){ if(pendingResume){ pendingResume=false; resumeFolder(); } else connectFolder(); });
-  document.getElementById('syncnow').addEventListener('click',function(){ syncNow(true); });
-  document.getElementById('chanchip').addEventListener('click',function(){ readAll().then(openChannelPicker); });
-  document.getElementById('rename').addEventListener('click',function(){ var n=(prompt('Your name:',me)||'').trim(); if(!n) return; localStorage.setItem('lb_user',n); location.reload(); });
+  document.getElementById('switchbtn').addEventListener('click', openSeatPicker);
+  document.getElementById('chanchip').addEventListener('click', openSeatPicker);
   function delSel(){ if(sel){ snapshot(); var i=mine.indexOf(sel); if(i>=0) mine.splice(i,1); sel=null; commit(); } }
-
-  document.getElementById('exp').addEventListener('click',function(){ var fn=myChannel||chanFile(me);
-    var blob=new Blob([JSON.stringify({user:me,channel:chanLabel(fn),t:Date.now(),objects:mine})],{type:'application/json'});
-    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fn; a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); },1000); });
-  document.getElementById('imp').addEventListener('click',function(){ document.getElementById('fileJson').click(); });
-  document.getElementById('fileJson').addEventListener('change',function(e){ var f=e.target.files[0]; if(!f) return; var r=new FileReader();
-    r.onload=function(){ try{ var d=JSON.parse(r.result), objs=Array.isArray(d.objects)?d.objects:[]; var fn=chanFile(d.channel||d.user||'imported');
-      others[fn]={ user:d.user||chanLabel(fn), objects:objs }; render(); updatePeers(); }catch(err){ alert('Not a valid board JSON.'); } };
-    r.readAsText(f); e.target.value=''; });
 
   // ---- keyboard ---------------------------------------------------------
   window.addEventListener('keydown',function(e){
@@ -467,21 +484,18 @@
   });
   window.addEventListener('keyup',function(e){ if(e.code==='Space'){ spaceDown=false; if(tool!=='pan') canvas.style.cursor='default'; } });
   window.addEventListener('resize',resize);
+  window.addEventListener('pagehide', function(){ if(window._lbBeat){ clearInterval(window._lbBeat); window._lbBeat=null; } freeSeat(); });
 
   // ---- boot -------------------------------------------------------------
   (async function(){
-    await idbOpen(); await loadLocal(); resize(); updatePeers();
+    await idbOpen(); resize(); updatePeers();
+    // silently reconnect to the remembered folder if still authorised
     try{
       var h=await idbGet('dirHandle');
-      if(h){
-        var perm = h.queryPermission ? await h.queryPermission({mode:'readwrite'}) : 'granted';
-        if(perm==='granted'){                       // still authorised → fully auto-reconnect
-          dirHandle=h; await readAll();
-          if(myChannel && folderIndex[myChannel]){ adoptChannel(myChannel, true); startSync(); }
-          else openChannelPicker();
-        } else { armResume(); }                       // needs one click to re-grant (browser security)
-      }
-    }catch(e){ console.warn('restore failed', e); }
+      if(h){ var perm = h.queryPermission ? await h.queryPermission({mode:'readwrite'}) : 'granted';
+        if(perm==='granted'){ dirHandle=h; try{ await readAll(); }catch(e){} } }
+    }catch(e){}
+    openSeatPicker();   // every session: pick a seat (or select the folder first)
   })();
 })();
 </script>
