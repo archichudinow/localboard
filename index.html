@@ -67,6 +67,10 @@
   .chan .taken{font-size:11px;color:#b45309;background:#fef3c7;border-radius:6px;padding:2px 7px}
   .modal .row{display:flex;gap:8px;margin-top:8px}
   .modal input[type=text]{flex:1;border:1px solid var(--bd);border-radius:9px;padding:9px 11px;font-size:14px}
+  .linkbtn{all:unset;cursor:pointer;color:var(--acc);font-weight:600}
+  .linkbtn:hover{text-decoration:underline}
+  #modalfoot{margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);font-size:12px;color:var(--sub);display:flex;justify-content:space-between;align-items:center;gap:10px}
+  #folderName{color:var(--tx)}
 </style>
 </head>
 <body>
@@ -129,6 +133,10 @@
         <input type="text" id="newchan" placeholder="New seat name (e.g. your name)">
         <button class="btn primary" id="createchan">Create</button>
       </div>
+    </div>
+    <div id="modalfoot">
+      <span>Folder: <b id="folderName">none</b></span>
+      <button class="linkbtn" id="changefolder">Change folder</button>
     </div>
   </div>
 </div>
@@ -249,11 +257,17 @@
         if(perm==='granted'){ dirHandle=h; await readAll(); renderPicker(); return; }
       }catch(e){}
     }
+    pickFolderFresh();
+  }
+  // Always show the OS folder picker, even if a folder is already remembered —
+  // lets people switch pools or retry if the first pick was wrong.
+  async function pickFolderFresh(){
     if(!window.showDirectoryPicker){ alert('Folder sync needs Chrome or Edge.'); return; }
     try{
-      dirHandle=await window.showDirectoryPicker({ mode:'readwrite', id:'localboard' });
-      if(dirHandle.requestPermission){ var p=await dirHandle.requestPermission({mode:'readwrite'}); if(p!=='granted'){ dirHandle=null; return; } }
-      idbSet('dirHandle', dirHandle);   // remember folder for next time
+      var d=await window.showDirectoryPicker({ mode:'readwrite', id:'localboard' });
+      if(d.requestPermission){ var p=await d.requestPermission({mode:'readwrite'}); if(p!=='granted') return; }
+      dirHandle=d; idbSet('dirHandle', d);
+      parsedCache={}; folderIndex={}; presenceMap={};   // fresh folder → drop stale caches
       await readAll(); renderPicker();
     }catch(e){ /* cancelled */ }
   }
@@ -306,6 +320,8 @@
     if(window._lbPick){ clearInterval(window._lbPick); window._lbPick=null; } }
   function renderPicker(){
     var fp=document.getElementById('folderpick'), sw=document.getElementById('seatwrap');
+    document.getElementById('folderName').textContent = dirHandle ? (dirHandle.name||'selected') : 'none';
+    document.getElementById('changefolder').style.display = dirHandle ? 'inline' : 'none';
     if(!dirHandle){ fp.style.display='block'; sw.style.display='none';
       document.getElementById('mtitle').textContent='Join the board';
       document.getElementById('mdesc').textContent='First, everyone selects the same shared folder.'; return; }
@@ -335,6 +351,7 @@
   function takeSeat(l){ var fn='board-'+l+'.json'; if(myChannel&&myChannel!==fn) freeSeat(); closeModal(); adoptChannel(fn, true); startSync(); }
   document.getElementById('overlay').addEventListener('click', function(e){ if(e.target.id==='overlay' && myChannel) closeModal(); });
   document.getElementById('pickfolder').addEventListener('click', ensureFolder);
+  document.getElementById('changefolder').addEventListener('click', pickFolderFresh);
   document.getElementById('createchan').addEventListener('click', function(){
     if(!dirHandle){ ensureFolder(); return; }
     var l=safe((document.getElementById('newchan').value||'').trim() || me);
