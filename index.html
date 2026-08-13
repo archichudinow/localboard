@@ -492,10 +492,10 @@
   // Closing is explicit only (the ✕, shown once you have a seat) — a misclick on
   // the dark backdrop while typing a nick must not throw the user out.
   document.getElementById('mclose').addEventListener('click', function(){ if(mySlot) closeModal(); });
-  document.getElementById('pickfolder').addEventListener('click', function(){ homeView?pickFolderFresh(false):ensureFolder(); });
+  document.getElementById('pickfolder').addEventListener('click', function(){ pickFolderFresh(false); });   // always show the OS folder picker
   document.getElementById('setuppool').addEventListener('click', function(){ pickFolderFresh(true); });
   document.getElementById('changefolder').addEventListener('click', function(){ pickFolderFresh(false); });
-  document.getElementById('joinfree').addEventListener('click', function(){ if(!dirHandle){ ensureFolder(); return; } var fn=firstFree(); if(!fn){ alert('All 20 animals are busy right now.'); return; } tryJoin(fn); });
+  document.getElementById('joinfree').addEventListener('click', function(){ if(!dirHandle){ pickFolderFresh(false); return; } var fn=firstFree(); if(!fn){ alert('All 20 animals are busy right now.'); return; } tryJoin(fn); });
   document.getElementById('nick').addEventListener('keydown', function(e){ if(e.key==='Enter'){ document.getElementById('joinfree').click(); } });
 
   function updatePeers(){
