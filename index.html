@@ -17,8 +17,7 @@
     radial-gradient(circle, #d7dae1 1px, transparent 1px) 0 0/22px 22px, var(--bg);cursor:default}
 
   .bar{position:fixed;z-index:10;display:flex;align-items:center;gap:6px;
-    background:var(--panel);border:1px solid var(--bd);border-radius:12px;
-    box-shadow:var(--shadow);padding:6px}
+    background:var(--panel);border:1px solid var(--bd);border-radius:12px;box-shadow:var(--shadow);padding:6px}
   #tools{top:14px;left:50%;transform:translateX(-50%)}
   #left{top:14px;left:14px;gap:10px;padding:8px 12px;font-size:13px}
   #right{top:14px;right:14px}
@@ -32,6 +31,7 @@
   .sep{width:1px;height:24px;background:var(--bd);margin:0 2px}
   input[type=color]{width:30px;height:30px;border:none;background:none;padding:0;cursor:pointer;border-radius:8px}
   input[type=range]{width:88px}
+  input[type=text]{border:1px solid var(--bd);border-radius:9px;padding:9px 11px;font-size:14px}
   .dot{width:9px;height:9px;border-radius:50%;background:#c7ccd4;flex:none}
   .dot.live{background:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.15)}
   #status{font-size:12px;color:var(--sub)}
@@ -39,38 +39,38 @@
   .chip{display:none;align-items:center;gap:7px;height:34px;padding:0 10px;border-radius:8px;
     background:var(--acc-soft);color:var(--acc);font-size:13px;font-weight:600;cursor:pointer}
   .chip .sw{width:10px;height:10px;border-radius:3px}
-  .hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:10;
-    font-size:12px;color:var(--sub);background:var(--panel);border:1px solid var(--bd);
-    border-radius:999px;padding:6px 14px;box-shadow:var(--shadow)}
+  .hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:10;font-size:12px;color:var(--sub);
+    background:var(--panel);border:1px solid var(--bd);border-radius:999px;padding:6px 14px;box-shadow:var(--shadow)}
   #peers{position:fixed;bottom:12px;right:12px;z-index:10;font-size:12px;color:var(--sub);
-    background:var(--panel);border:1px solid var(--bd);border-radius:10px;padding:8px 12px;
-    box-shadow:var(--shadow);max-width:250px;display:none}
+    background:var(--panel);border:1px solid var(--bd);border-radius:10px;padding:8px 12px;box-shadow:var(--shadow);max-width:250px;display:none}
   #peers b{color:var(--tx)}
   #peers .pw{display:flex;align-items:center;gap:7px;margin-top:5px}
   #peers .sw{width:10px;height:10px;border-radius:3px;flex:none}
   #peers .me{font-weight:600;color:var(--tx)}
 
-  .overlay{position:fixed;inset:0;z-index:50;background:rgba(17,24,39,.35);
-    display:none;align-items:center;justify-content:center}
-  .modal{background:var(--panel);border:1px solid var(--bd);border-radius:16px;
-    box-shadow:0 20px 60px rgba(16,24,40,.25);width:min(92vw,440px);max-height:80vh;
-    overflow:auto;padding:22px}
+  .overlay{position:fixed;inset:0;z-index:50;background:rgba(17,24,39,.35);display:none;align-items:center;justify-content:center}
+  .modal{background:var(--panel);border:1px solid var(--bd);border-radius:16px;box-shadow:0 20px 60px rgba(16,24,40,.25);
+    width:min(94vw,470px);max-height:84vh;overflow:auto;padding:22px}
   .modal h2{margin:0 0 4px;font-size:18px}
   .modal p{margin:0 0 16px;color:var(--sub);font-size:13px}
-  .chan{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
-    border:1px solid var(--bd);background:#fff;border-radius:10px;padding:11px 13px;margin:0 0 8px;cursor:pointer}
-  .chan:hover{border-color:var(--acc);background:var(--acc-soft)}
-  .chan .sw{width:12px;height:12px;border-radius:4px;flex:none}
-  .chan .meta{flex:1;min-width:0}
-  .chan .t{font-weight:600;font-size:14px}
-  .chan .s{font-size:12px;color:var(--sub)}
-  .chan .taken{font-size:11px;color:#b45309;background:#fef3c7;border-radius:6px;padding:2px 7px}
-  .modal .row{display:flex;gap:8px;margin-top:8px}
-  .modal input[type=text]{flex:1;border:1px solid var(--bd);border-radius:9px;padding:9px 11px;font-size:14px}
+  .modal .row{display:flex;gap:8px}
+  .modal input[type=text]{flex:1}
+  .mnote{color:var(--sub);font-size:12px;margin:10px 0 0}
   .linkbtn{all:unset;cursor:pointer;color:var(--acc);font-weight:600}
   .linkbtn:hover{text-decoration:underline}
-  #modalfoot{margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);font-size:12px;color:var(--sub);display:flex;justify-content:space-between;align-items:center;gap:10px}
+  #modalfoot{margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);font-size:12px;color:var(--sub);
+    display:flex;justify-content:space-between;align-items:center;gap:10px}
   #folderName{color:var(--tx)}
+  .slotgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .slotcell{all:unset;border:1px solid var(--bd);border-radius:10px;padding:8px 9px;cursor:pointer;background:#fff;
+    min-height:54px;display:flex;flex-direction:column;gap:3px;box-sizing:border-box}
+  .slotcell:hover{border-color:var(--acc)}
+  .slotcell .n{font-size:11px;color:var(--sub)}
+  .slotcell .who{font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .slotcell .sw{width:9px;height:9px;border-radius:3px;flex:none}
+  .slotcell.busy{opacity:.6;cursor:not-allowed;background:#f9fafb}
+  .slotcell.you{border-color:var(--acc);background:var(--acc-soft)}
+  .slotcell.free .who{color:#3730a3}
 </style>
 </head>
 <body>
@@ -78,8 +78,8 @@
 
 <div class="bar" id="left">
   <span class="dot" id="syncdot"></span>
-  <span id="name">…</span>
-  <span id="status">local only</span>
+  <span id="name">—</span>
+  <span id="status">not joined</span>
 </div>
 
 <div class="bar" id="tools">
@@ -122,21 +122,21 @@
 <div class="overlay" id="overlay">
   <div class="modal">
     <h2 id="mtitle">Join the board</h2>
-    <p id="mdesc">Pick a free seat to start. Busy seats are in use right now; when someone leaves, their seat frees up.</p>
+    <p id="mdesc">Select your project folder to begin.</p>
     <div id="folderpick" style="display:none">
-      <button class="btn primary" id="pickfolder" style="justify-content:center;width:100%;height:44px;font-size:14px">Select shared folder</button>
-      <p style="color:#6b7280;font-size:12px;margin:10px 0 0">Everyone chooses the <b>same</b> folder (a shared or cloud-synced folder). Chrome or Edge.</p>
+      <button class="btn primary" id="pickfolder" style="justify-content:center;width:100%;height:44px;font-size:14px">Select project folder</button>
+      <p class="mnote">Everyone opens the <b>same</b> project folder. Images are saved in its <b>assets</b> subfolder, and 20 seat files are created so everyone shows up immediately. Chrome or Edge.</p>
     </div>
-    <div id="seatwrap">
-      <div id="chanlist"></div>
-      <div class="row">
-        <input type="text" id="newchan" placeholder="New seat name (e.g. your name)">
-        <button class="btn primary" id="createchan">Create</button>
+    <div id="slotwrap" style="display:none">
+      <div class="row" style="margin-bottom:12px">
+        <input type="text" id="nick" placeholder="Your nick" maxlength="24">
+        <button class="btn primary" id="joinfree">Join a seat</button>
       </div>
+      <div class="slotgrid" id="slotgrid"></div>
     </div>
     <div id="modalfoot">
       <span>Folder: <b id="folderName">none</b></span>
-      <button class="linkbtn" id="changefolder">Change folder</button>
+      <button class="linkbtn" id="changefolder" style="display:none">Change folder</button>
     </div>
   </div>
 </div>
@@ -148,229 +148,227 @@
   "use strict";
   var canvas=document.getElementById('canvas'), ctx=canvas.getContext('2d');
   var dpr=1, W=0, H=0;
+  var SLOTS=20, TTL=8000;
 
-  // ---- identity + channel ----------------------------------------------
-  var me = localStorage.getItem('lb_user') || '';
-  if(!me){ me = (prompt('Your name:','') || '').trim(); }
-  if(!me){ me = 'guest-' + Math.floor(Math.random()*9000+1000); }
-  localStorage.setItem('lb_user', me);
-  function safe(s){ return String(s).toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'') || 'x'; }
-  document.getElementById('name').textContent = me;
-
-  var myChannel = localStorage.getItem('lb_channel') || '';   // filename, e.g. board-anna.json
-  function chanLabel(fn){ return (fn||'').replace(/^board-/,'').replace(/\.json$/,''); }
-  function chanFile(label){ return 'board-' + safe(label) + '.json'; }
+  var me = localStorage.getItem('lb_nick') || '';
+  var mySlot = localStorage.getItem('lb_slot') || '';   // 'slot-03.json'
+  document.getElementById('name').textContent = me || '—';
 
   function uid(){ return Date.now().toString(36)+'-'+Math.floor(Math.random()*1e6).toString(36); }
-  function hueColor(u){ var h=0; for(var i=0;i<u.length;i++) h=(h*31+u.charCodeAt(i))%360; return 'hsl('+h+' 65% 52%)'; }
+  function pad2(n){ return ('0'+n).slice(-2); }
+  function slotName(i){ return 'slot-'+pad2(i)+'.json'; }
+  function slotNum(fn){ var m=(fn||'').match(/(\d+)/); return m?+m[1]:0; }
+  function hueColor(u){ u=u||'?'; var h=0; for(var i=0;i<u.length;i++) h=(h*31+u.charCodeAt(i))%360; return 'hsl('+h+' 65% 52%)'; }
 
   // ---- state ------------------------------------------------------------
-  var mine = [];              // objects of MY channel (authoritative in memory)
-  var others = {};            // fileName -> { user, objects }  (read-only)
-  var view = { s:1, tx:0, ty:0 };
+  var mine=[];                 // objects of MY slot (authoritative in memory)
+  var others={};               // fileName -> { nick, objects } (read-only)
+  var slots={};                // fileName -> { slot, nick, seen, objects }
+  var view={ s:1, tx:0, ty:0 };
   var tool='select', color='#111827', width=3, sel=null;
   var imgCache={}, undoStack=[];
-  var dirHandle=null, scanning=false, folderIndex={}, parsedCache={};
-  var presenceMap={};            // seatLabel -> { user, t }  (live-presence heartbeats)
-  var PRES_TTL=8000;             // a seat is "busy" only if its heartbeat is newer than this
+  var dirHandle=null, assetsHandle=null, scanning=false, parsedCache={};
 
-  function allObjects(){
-    var out = mine.slice();
-    for(var fn in others) out = out.concat(others[fn].objects||[]);
-    return out;
-  }
-  function getImg(src){ if(imgCache[src]) return imgCache[src]; var im=new Image(); im.onload=render; im.src=src; imgCache[src]=im; return im; }
+  function allObjects(){ var out=mine.slice(); for(var fn in others) out=out.concat(others[fn].objects||[]); return out; }
 
-  // ---- local cache (IndexedDB — no ~5MB localStorage limit) -------------
+  // ---- IndexedDB (remember folder handle + local crash cache) -----------
   var DB=null;
   function idbOpen(){ return new Promise(function(res){ try{ var r=indexedDB.open('localboard',1);
-    r.onupgradeneeded=function(){ r.result.createObjectStore('boards'); };
+    r.onupgradeneeded=function(){ r.result.createObjectStore('kv'); };
     r.onsuccess=function(){ DB=r.result; res(DB); }; r.onerror=function(){ res(null); }; }catch(e){ res(null); } }); }
-  function idbGet(k){ return new Promise(function(res){ if(!DB) return res(null); try{ var t=DB.transaction('boards','readonly').objectStore('boards').get(k); t.onsuccess=function(){ res(t.result||null); }; t.onerror=function(){ res(null); }; }catch(e){ res(null); } }); }
-  function idbSet(k,v){ return new Promise(function(res){ if(!DB) return res(); try{ var t=DB.transaction('boards','readwrite').objectStore('boards').put(v,k); t.onsuccess=function(){ res(); }; t.onerror=function(){ res(); }; }catch(e){ res(); } }); }
-
-  function mineKey(){ return 'mine:' + safe(myChannel||'local'); }
-  function saveLocal(){ idbSet(mineKey(), mine); }
-  async function loadLocal(){ var v=await idbGet(mineKey()); if(Array.isArray(v)) mine=v; }
+  function idbGet(k){ return new Promise(function(res){ if(!DB) return res(null); try{ var t=DB.transaction('kv','readonly').objectStore('kv').get(k); t.onsuccess=function(){ res(t.result||null); }; t.onerror=function(){ res(null); }; }catch(e){ res(null); } }); }
+  function idbSet(k,v){ return new Promise(function(res){ if(!DB) return res(); try{ var t=DB.transaction('kv','readwrite').objectStore('kv').put(v,k); t.onsuccess=function(){ res(); }; t.onerror=function(){ res(); }; }catch(e){ res(); } }); }
+  function saveLocal(){ idbSet('mine:'+(mySlot||'x'), mine); }
 
   function snapshot(){ undoStack.push(JSON.stringify(mine)); if(undoStack.length>60) undoStack.shift(); }
   function undo(){ if(!undoStack.length) return; mine=JSON.parse(undoStack.pop()); sel=null; commit(); }
   function commit(){ saveLocal(); scheduleWrite(); render(); }
 
-  // ---- shared folder (File System Access API) ---------------------------
+  // ---- images as asset files -------------------------------------------
+  function fileToImage(file){ return new Promise(function(res,rej){ var r=new FileReader();
+    r.onload=function(){ var im=new Image(); im.onload=function(){ res(im); }; im.onerror=rej; im.src=r.result; }; r.onerror=rej; r.readAsDataURL(file); }); }
+  function compress(img){ return new Promise(function(res){
+    var max=1600, sc=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+    var w=Math.max(1,Math.round(img.naturalWidth*sc)), h=Math.max(1,Math.round(img.naturalHeight*sc));
+    var c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
+    c.toBlob(function(b){ if(b){ res({blob:b,w:w,h:h,ext:'webp'}); }
+      else c.toBlob(function(b2){ res({blob:b2,w:w,h:h,ext:'jpg'}); },'image/jpeg',0.85); },'image/webp',0.85);
+  }); }
+  function blobToDataURL(b){ return new Promise(function(res){ var r=new FileReader(); r.onload=function(){ res(r.result); }; r.readAsDataURL(b); }); }
+  async function writeAsset(name, blob){ if(!assetsHandle) return;
+    try{ var h=await assetsHandle.getFileHandle(name,{create:true}); var w=await h.createWritable(); await w.write(blob); await w.close(); }catch(e){ console.warn('asset write',e); } }
+  async function loadAsset(name, im){ if(!assetsHandle) return;
+    try{ var h=await assetsHandle.getFileHandle(name); var f=await h.getFile(); im.src=URL.createObjectURL(f); im.onload=render; }catch(e){} }
+  function getImg(key){ if(!key) return new Image(); if(imgCache[key]) return imgCache[key];
+    var im=new Image(); imgCache[key]=im;
+    if(/^data:/.test(key)){ im.src=key; im.onload=render; } else { loadAsset(key, im); }
+    return im; }
+  function imgKey(o){ return o.asset||o.src; }
+
+  async function addImageFile(file, atWorld){
+    try{
+      var img=await fileToImage(file), cmp=await compress(img);
+      var id=uid(), c=atWorld||toWorld(W/2,H/2), max=340, sc=Math.min(1,max/Math.max(cmp.w,cmp.h)), w=cmp.w*sc, h=cmp.h*sc;
+      var obj={ id:id, type:'image', x:c.x-w/2, y:c.y-h/2, w:w, h:h };
+      var im=new Image(); im.src=URL.createObjectURL(cmp.blob); im.onload=render;
+      if(assetsHandle){ var name=id+'.'+cmp.ext; obj.asset=name; imgCache[name]=im; writeAsset(name, cmp.blob); }
+      else { obj.src=await blobToDataURL(cmp.blob); imgCache[obj.src]=im; }
+      snapshot(); mine.push(obj); commit();
+    }catch(e){ console.warn('image failed', e); }
+  }
+
+  // ---- shared folder ----------------------------------------------------
   var writeTimer=null, writing=false, writeAgain=false;
-  function scheduleWrite(){ if(!dirHandle||!myChannel) return; clearTimeout(writeTimer); writeTimer=setTimeout(writeMine, 600); }
+  function scheduleWrite(){ if(!dirHandle||!mySlot) return; clearTimeout(writeTimer); writeTimer=setTimeout(writeMine, 500); }
   async function writeMine(){
-    if(!dirHandle||!myChannel) return;
-    if(writing){ writeAgain=true; return; }   // serialise: never open two writables on the same file
+    if(!dirHandle||!mySlot) return;
+    if(writing){ writeAgain=true; return; }
     writing=true;
     try{
-      var h=await dirHandle.getFileHandle(myChannel, {create:true});
-      var w=await h.createWritable();
-      await w.write(new Blob([JSON.stringify({user:me, channel:chanLabel(myChannel), t:Date.now(), objects:mine})],{type:'application/json'}));
+      var h=await dirHandle.getFileHandle(mySlot, {create:true}); var w=await h.createWritable();
+      await w.write(new Blob([JSON.stringify({ slot:slotNum(mySlot), nick:me, seen:Date.now(), objects:mine })],{type:'application/json'}));
       await w.close();
     }catch(e){ console.warn('write failed', e); }
     finally{ writing=false; if(writeAgain){ writeAgain=false; writeMine(); } }
   }
-  // read every board-*.json into folderIndex; returns it
-  async function readAll(){
-    var idx={}, pres={};
-    for await (var entry of dirHandle.values()){
-      if(entry.kind!=='file') continue;
-      var fn=entry.name;
-      var pm=fn.match(/^presence-(.+)\.json$/i);
-      if(pm){ try{ var pf=await entry.getFile(); var pd=JSON.parse(await pf.text());
-        pres[pd.slot||pm[1]]={ user:pd.user||pm[1], t:pd.t||0 }; }catch(e){} continue; }
-      if(!/^board-.+\.json$/i.test(fn)) continue;
-      try{
-        var f=await entry.getFile();
-        var cached=parsedCache[fn];
-        if(cached && cached.lm===f.lastModified){ idx[fn]={ user:cached.user, objects:cached.objects }; continue; } // unchanged: skip re-parse
-        var d=JSON.parse(await f.text());
-        var rec={ user:d.user||chanLabel(fn), objects:Array.isArray(d.objects)?d.objects:[] };
-        parsedCache[fn]={ lm:f.lastModified, user:rec.user, objects:rec.objects };
-        idx[fn]=rec;
-      }catch(e){ idx[fn]={ user:chanLabel(fn), objects:[] }; }
-    }
-    folderIndex=idx; presenceMap=pres; return idx;
+  async function freeSeat(){   // keep drawings, clear presence so the seat frees now
+    if(!dirHandle||!mySlot) return;
+    try{ var h=await dirHandle.getFileHandle(mySlot,{create:true}); var w=await h.createWritable();
+      await w.write(new Blob([JSON.stringify({ slot:slotNum(mySlot), nick:'', seen:0, objects:mine })],{type:'application/json'})); await w.close(); }catch(e){}
   }
-  async function syncNow(pushFirst){
+  async function readAll(){
+    var idx={};
+    for await (var entry of dirHandle.values()){
+      if(entry.kind!=='file') continue; var fn=entry.name, m=fn.match(/^slot-(\d+)\.json$/i); if(!m) continue;
+      try{
+        var f=await entry.getFile(), cached=parsedCache[fn];
+        if(cached && cached.lm===f.lastModified){ idx[fn]=cached.rec; continue; }
+        var d=JSON.parse(await f.text());
+        var rec={ slot:+m[1], nick:d.nick||'', seen:d.seen||0, objects:Array.isArray(d.objects)?d.objects:[] };
+        parsedCache[fn]={ lm:f.lastModified, rec:rec }; idx[fn]=rec;
+      }catch(e){ idx[fn]={ slot:+m[1], nick:'', seen:0, objects:[] }; }
+    }
+    slots=idx;
+    var o={}; for(var k in idx){ if(k!==mySlot) o[k]={ nick:idx[k].nick, objects:idx[k].objects }; } others=o;
+    return idx;
+  }
+  async function syncNow(){
     if(!dirHandle||scanning) return; scanning=true;
-    try{
-      if(pushFirst) await writeMine();
-      var idx=await readAll();
-      var o={};
-      for(var fn in idx){ if(fn!==myChannel) o[fn]=idx[fn]; }
-      others=o; render(); updatePeers(); flashSync();
-    }catch(e){ console.warn('sync failed', e); }
-    finally{ scanning=false; }
+    try{ await readAll(); render(); updatePeers(); if(document.getElementById('overlay').style.display==='flex') renderPicker(); flashSync(); }
+    catch(e){ console.warn('sync failed', e); } finally{ scanning=false; }
   }
 
-  // Get a usable folder handle: reuse the remembered one (re-granting if needed),
-  // else let the user pick one. Then refresh the seat picker.
-  async function ensureFolder(){
+  // create the assets folder + 20 seat files if missing
+  async function initPool(){
+    try{ assetsHandle=await dirHandle.getDirectoryHandle('assets',{create:true}); }catch(e){ assetsHandle=null; }
+    var have={};
+    try{ for await (var e of dirHandle.values()){ if(e.kind==='file'){ var m=e.name.match(/^slot-(\d+)\.json$/i); if(m) have[+m[1]]=true; } } }catch(e){}
+    for(var i=1;i<=SLOTS;i++){ if(!have[i]){
+      try{ var h=await dirHandle.getFileHandle(slotName(i),{create:true}); var w=await h.createWritable();
+        await w.write(new Blob([JSON.stringify({ slot:i, nick:'', seen:0, objects:[] })],{type:'application/json'})); await w.close(); }catch(e){}
+    } }
+  }
+  async function afterFolder(){ await initPool(); await readAll(); renderPicker(); }
+
+  async function ensureFolder(){   // reuse remembered handle if still granted, else pick
     var h=await idbGet('dirHandle');
-    if(h){
-      try{
-        var perm = h.queryPermission ? await h.queryPermission({mode:'readwrite'}) : 'granted';
-        if(perm!=='granted' && h.requestPermission) perm = await h.requestPermission({mode:'readwrite'});
-        if(perm==='granted'){ dirHandle=h; await readAll(); renderPicker(); return; }
-      }catch(e){}
-    }
+    if(h){ try{ var perm=h.queryPermission?await h.queryPermission({mode:'readwrite'}):'granted';
+      if(perm!=='granted' && h.requestPermission) perm=await h.requestPermission({mode:'readwrite'});
+      if(perm==='granted'){ dirHandle=h; await afterFolder(); return; } }catch(e){} }
     pickFolderFresh();
   }
-  // Always show the OS folder picker, even if a folder is already remembered —
-  // lets people switch pools or retry if the first pick was wrong.
-  async function pickFolderFresh(){
+  async function pickFolderFresh(){   // always show the OS folder picker
     if(!window.showDirectoryPicker){ alert('Folder sync needs Chrome or Edge.'); return; }
     try{
       var d=await window.showDirectoryPicker({ mode:'readwrite', id:'localboard' });
       if(d.requestPermission){ var p=await d.requestPermission({mode:'readwrite'}); if(p!=='granted') return; }
-      dirHandle=d; idbSet('dirHandle', d);
-      parsedCache={}; folderIndex={}; presenceMap={};   // fresh folder → drop stale caches
-      await readAll(); renderPicker();
+      dirHandle=d; assetsHandle=null; idbSet('dirHandle', d);
+      parsedCache={}; slots={}; others={};
+      await afterFolder();
     }catch(e){ /* cancelled */ }
   }
 
-  // presence heartbeat — tiny file, written every few seconds while my tab is open
-  async function writePresence(){
-    if(!dirHandle||!myChannel) return;
-    try{
-      var name='presence-'+safe(chanLabel(myChannel))+'.json';
-      var hh=await dirHandle.getFileHandle(name,{create:true}); var w=await hh.createWritable();
-      await w.write(new Blob([JSON.stringify({ user:me, slot:chanLabel(myChannel), t:Date.now() })],{type:'application/json'})); await w.close();
-    }catch(e){}
-  }
-  async function freeSeat(){   // best-effort release when leaving (TTL frees it anyway)
-    if(!dirHandle||!myChannel) return;
-    try{ await dirHandle.removeEntry('presence-'+safe(chanLabel(myChannel))+'.json'); }catch(e){}
-  }
+  // ---- join / seat ------------------------------------------------------
+  function isLive(fn){ var r=slots[fn]; return r && r.nick && (Date.now()-r.seen < TTL); }
+  function firstFree(){ for(var i=1;i<=SLOTS;i++){ var fn=slotName(i); if(!isLive(fn) || fn===mySlot) return fn; } return null; }
 
-  function adoptChannel(fn, keepMineIfNew){
-    myChannel=fn; localStorage.setItem('lb_channel', fn);
-    if(folderIndex[fn]){ mine=JSON.parse(JSON.stringify(folderIndex[fn].objects||[])); }
-    else if(!keepMineIfNew){ mine=[]; }
+  function joinSlot(fn){
+    if(mySlot && mySlot!==fn) freeSeat();
+    mySlot=fn; localStorage.setItem('lb_slot', fn); localStorage.setItem('lb_nick', me);
+    var rec=slots[fn]; mine = rec ? JSON.parse(JSON.stringify(rec.objects||[])) : [];
+    mine.forEach(function(o){ if(o.type==='image') getImg(imgKey(o)); });
     undoStack=[]; sel=null;
-    var o={}; for(var k in folderIndex){ if(k!==fn) o[k]=folderIndex[k]; } others=o;
+    var o={}; for(var k in slots){ if(k!==fn) o[k]={ nick:slots[k].nick, objects:slots[k].objects }; } others=o;
+    updateChip(); document.getElementById('name').textContent=me;
+    saveLocal(); render(); updatePeers(); startSync(); closeModal();
+  }
+  function tryJoin(fn){
+    var n=(document.getElementById('nick').value||'').trim() || me;
+    if(!n){ document.getElementById('nick').focus(); return; }
+    me=n; localStorage.setItem('lb_nick', n);
+    if(isLive(fn) && fn!==mySlot){ alert('That seat is busy right now — pick a free one.'); return; }
+    joinSlot(fn);
+  }
+  function updateChip(){
     var sw=document.querySelector('#chanchip .sw'); if(sw) sw.style.background=hueColor(me);
-    document.getElementById('channame').textContent=chanLabel(fn);
+    document.getElementById('channame').textContent='Seat '+slotNum(mySlot);
     document.getElementById('chanchip').style.display='inline-flex';
     document.getElementById('switchbtn').textContent='Switch seat';
-    saveLocal(); render(); updatePeers();
   }
   function startSync(){
-    setSyncUI(true);
-    if(!window._lbPoll) window._lbPoll=setInterval(function(){ syncNow(false); }, 1000);
-    if(!window._lbBeat) window._lbBeat=setInterval(writePresence, 3000);
-    writePresence(); writeMine();
+    document.getElementById('syncdot').classList.add('live');
+    document.getElementById('status').textContent='seat '+slotNum(mySlot)+' · '+me;
+    if(!window._lbPoll) window._lbPoll=setInterval(syncNow, 1000);
+    if(!window._lbBeat) window._lbBeat=setInterval(writeMine, 3000);
+    writeMine();
   }
-  function setSyncUI(on){
-    document.getElementById('syncdot').classList.toggle('live', !!on);
-    document.getElementById('status').textContent = on ? 'seat: '+chanLabel(myChannel) : 'local only';
-  }
-  function flashSync(){ var d=document.getElementById('syncdot'); d.style.transform='scale(1.5)'; setTimeout(function(){ d.style.transform='scale(1)'; },150); }
+  function flashSync(){ var d=document.getElementById('syncdot'); d.style.transform='scale(1.5)'; setTimeout(function(){ d.style.transform='scale(1)'; },120); }
 
-  // ---- seat picker modal ------------------------------------------------
-  function isLive(l){ return presenceMap[l] && (Date.now()-presenceMap[l].t < PRES_TTL); }
+  // ---- picker modal -----------------------------------------------------
   function openSeatPicker(){
+    document.getElementById('nick').value=me;
     document.getElementById('overlay').style.display='flex'; renderPicker();
     if(!window._lbPick) window._lbPick=setInterval(function(){ if(dirHandle) readAll().then(renderPicker).catch(function(){}); }, 1500);
   }
-  function closeModal(){ document.getElementById('overlay').style.display='none';
-    if(window._lbPick){ clearInterval(window._lbPick); window._lbPick=null; } }
+  function closeModal(){ document.getElementById('overlay').style.display='none'; if(window._lbPick){ clearInterval(window._lbPick); window._lbPick=null; } }
   function renderPicker(){
-    var fp=document.getElementById('folderpick'), sw=document.getElementById('seatwrap');
     document.getElementById('folderName').textContent = dirHandle ? (dirHandle.name||'selected') : 'none';
     document.getElementById('changefolder').style.display = dirHandle ? 'inline' : 'none';
+    var fp=document.getElementById('folderpick'), sw=document.getElementById('slotwrap');
     if(!dirHandle){ fp.style.display='block'; sw.style.display='none';
       document.getElementById('mtitle').textContent='Join the board';
-      document.getElementById('mdesc').textContent='First, everyone selects the same shared folder.'; return; }
+      document.getElementById('mdesc').textContent='First, everyone selects the same project folder.'; return; }
     fp.style.display='none'; sw.style.display='block';
-    document.getElementById('mtitle').textContent='Pick your seat';
-    document.getElementById('mdesc').textContent='Busy seats are in use right now. When someone leaves, their seat frees up.';
-    var list=document.getElementById('chanlist'); list.innerHTML='';
-    var myl=myChannel?chanLabel(myChannel):null, labels={};
-    Object.keys(folderIndex).forEach(function(fn){ labels[chanLabel(fn)]=true; });
-    for(var l in presenceMap) labels[l]=true;
-    var keys=Object.keys(labels).sort();
-    if(!keys.length){ list.innerHTML='<p style="color:#6b7280;font-size:13px;margin:0 0 8px">No seats yet — create the first one below.</p>'; }
-    keys.forEach(function(l){
-      var fn='board-'+l+'.json', info=folderIndex[fn], items=info?(info.objects||[]).length:0;
-      var live=isLive(l), occupant=(presenceMap[l]&&presenceMap[l].user)||(info&&info.user)||l, busy=live&&l!==myl;
-      var el=document.createElement('button'); el.className='chan'; el.disabled=!!busy;
-      if(busy){ el.style.opacity='.55'; el.style.cursor='not-allowed'; }
-      var tag = busy ? '<span class="taken">busy · '+occupant+'</span>'
-              : (l===myl ? '<span class="taken" style="background:#dcfce7;color:#166534">you</span>'
-                         : '<span class="taken" style="background:#eef2ff;color:#3730a3">free</span>');
-      el.innerHTML='<span class="sw" style="background:'+hueColor(occupant)+'"></span>'+
-        '<span class="meta"><span class="t">'+l+'</span><span class="s">'+(items?items+' items':'empty')+'</span></span>'+tag;
-      if(!busy) el.addEventListener('click', function(){ takeSeat(l); });
-      list.appendChild(el);
-    });
+    document.getElementById('mtitle').textContent='Enter your nick & take a seat';
+    document.getElementById('mdesc').textContent='Green seats are in use right now. Pick any free seat — when someone leaves, their seat frees up.';
+    var grid=document.getElementById('slotgrid'); grid.innerHTML='';
+    for(var i=1;i<=SLOTS;i++){ (function(i){
+      var fn=slotName(i), rec=slots[fn], live=isLive(fn), mineSlot=(fn===mySlot), busy=live&&!mineSlot;
+      var items=rec?(rec.objects||[]).length:0;
+      var who = live ? (rec.nick) : (items? items+' items' : 'free');
+      var cell=document.createElement('button'); cell.className='slotcell '+(busy?'busy':(mineSlot?'you':(live?'':'free'))); cell.disabled=!!busy;
+      cell.innerHTML='<span class="n">Seat '+i+'</span><span class="who">'+
+        ((live||mineSlot)?'<span class="sw" style="background:'+hueColor(rec.nick||me)+'"></span>':'')+
+        (mineSlot?'you':who)+'</span>';
+      if(!busy) cell.addEventListener('click', function(){ tryJoin(fn); });
+      grid.appendChild(cell);
+    })(i); }
   }
-  function takeSeat(l){ var fn='board-'+l+'.json'; if(myChannel&&myChannel!==fn) freeSeat(); closeModal(); adoptChannel(fn, true); startSync(); }
-  document.getElementById('overlay').addEventListener('click', function(e){ if(e.target.id==='overlay' && myChannel) closeModal(); });
+  document.getElementById('overlay').addEventListener('click', function(e){ if(e.target.id==='overlay' && mySlot) closeModal(); });
   document.getElementById('pickfolder').addEventListener('click', ensureFolder);
   document.getElementById('changefolder').addEventListener('click', pickFolderFresh);
-  document.getElementById('createchan').addEventListener('click', function(){
-    if(!dirHandle){ ensureFolder(); return; }
-    var l=safe((document.getElementById('newchan').value||'').trim() || me);
-    if(isLive(l) && l!==(myChannel&&chanLabel(myChannel))){ alert('That seat is busy right now — pick another name.'); return; }
-    var fn='board-'+l+'.json', keep = !myChannel && mine.length>0;   // first time: keep local sketches as this seat
-    if(myChannel&&myChannel!==fn) freeSeat();
-    if(!folderIndex[fn]) folderIndex[fn]={ user:me, objects: keep?mine:[] };
-    document.getElementById('newchan').value=''; closeModal(); adoptChannel(fn, keep); startSync();
-  });
+  document.getElementById('joinfree').addEventListener('click', function(){ if(!dirHandle){ ensureFolder(); return; } var fn=firstFree(); if(!fn){ alert('All 20 seats are busy right now.'); return; } tryJoin(fn); });
+  document.getElementById('nick').addEventListener('keydown', function(e){ if(e.key==='Enter'){ document.getElementById('joinfree').click(); } });
 
   function updatePeers(){
     var box=document.getElementById('peers');
     if(!dirHandle){ box.style.display='none'; return; }
-    var myl=myChannel?chanLabel(myChannel):null, live=[];
-    for(var l in presenceMap){ if(isLive(l)) live.push(l); }
-    if(myl && live.indexOf(myl)<0) live.push(myl);
+    var live=[]; for(var fn in slots){ if(isLive(fn)) live.push(fn); }
+    if(mySlot && live.indexOf(mySlot)<0) live.push(mySlot);
+    live.sort(function(a,b){ return slotNum(a)-slotNum(b); });
     var html='<b>'+live.length+'</b> here now';
-    live.sort().forEach(function(l){ var mineSeat=(l===myl); var u=(presenceMap[l]&&presenceMap[l].user)||(mineSeat?me:l);
-      html+='<div class="pw'+(mineSeat?' me':'')+'"><span class="sw" style="background:'+hueColor(u)+'"></span>'+l+' · '+u+(mineSeat?' (you)':'')+'</div>'; });
+    live.forEach(function(fn){ var mineSeat=(fn===mySlot), nick=(slots[fn]&&slots[fn].nick)||(mineSeat?me:'');
+      html+='<div class="pw'+(mineSeat?' me':'')+'"><span class="sw" style="background:'+hueColor(nick)+'"></span>Seat '+slotNum(fn)+' · '+(nick||'?')+(mineSeat?' (you)':'')+'</div>'; });
     box.innerHTML=html; box.style.display='block';
   }
 
@@ -389,7 +387,7 @@
     ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
     ctx.save(); ctx.translate(view.tx,view.ty); ctx.scale(view.s,view.s);
     var objs=allObjects();
-    objs.forEach(function(o){ if(o.type==='image'){ var im=getImg(o.src); if(im.complete&&im.naturalWidth) ctx.drawImage(im,o.x,o.y,o.w,o.h); } });
+    objs.forEach(function(o){ if(o.type==='image'){ var im=getImg(imgKey(o)); if(im.complete&&im.naturalWidth) ctx.drawImage(im,o.x,o.y,o.w,o.h); } });
     objs.forEach(function(o){ if(o.type==='stroke') drawStroke(o); });
     if(cur) drawStroke(cur);
     if(sel){ var b=bboxOf(sel); ctx.save(); ctx.strokeStyle='#2563eb'; ctx.lineWidth=1.5/view.s; ctx.setLineDash([6/view.s,4/view.s]);
@@ -417,7 +415,7 @@
     canvas.setPointerCapture(e.pointerId);
     var s=evPos(e), w=toWorld(s.x,s.y);
     if(spaceDown||tool==='pan'||e.button===1){ mode='pan'; last=s; canvas.style.cursor='grabbing'; return; }
-    if(tool==='pen'){ mode='draw'; cur={id:uid(),owner:me,type:'stroke',color:color,width:width,pts:[[w.x,w.y]]}; return; }
+    if(tool==='pen'){ if(!mySlot){ openSeatPicker(); return; } mode='draw'; cur={id:uid(),type:'stroke',color:color,width:width,pts:[[w.x,w.y]]}; return; }
     if(sel&&hitHandle(sel,w)){ mode='resize'; snapshot(); dragStart={w:w,ow:sel.w,oh:sel.h}; return; }
     var hit=hitTest(w);
     if(hit){ sel=hit; mode='move'; snapshot(); dragStart={w:w}; render(); }
@@ -430,8 +428,7 @@
     if(mode==='move'&&sel){ var dx=w.x-dragStart.w.x, dy=w.y-dragStart.w.y; dragStart.w=w;
       if(sel.type==='image'){ sel.x+=dx; sel.y+=dy; } else { sel.pts=sel.pts.map(function(p){return [p[0]+dx,p[1]+dy];}); } render(); return; }
     if(mode==='resize'&&sel){ sel.w=Math.max(20,dragStart.ow+(w.x-dragStart.w.x)); sel.h=Math.max(20,dragStart.oh+(w.y-dragStart.w.y)); render(); return; }
-    if(tool==='select') canvas.style.cursor=hitTest(w)?'move':'default';
-    else if(tool==='pen') canvas.style.cursor='crosshair'; else canvas.style.cursor='grab';
+    if(tool==='select') canvas.style.cursor=hitTest(w)?'move':'default'; else if(tool==='pen') canvas.style.cursor='crosshair'; else canvas.style.cursor='grab';
   });
   function endPointer(e){ try{ canvas.releasePointerCapture(e.pointerId); }catch(_){}
     if(mode==='draw'&&cur){ if(cur.pts.length>=1){ snapshot(); mine.push(cur); commit(); } cur=null; }
@@ -441,32 +438,14 @@
   canvas.addEventListener('wheel', function(e){ e.preventDefault(); var s=evPos(e); var factor=e.deltaY<0?1.1:1/1.1;
     var ns=Math.min(8,Math.max(0.05,view.s*factor)); factor=ns/view.s; view.tx=s.x-(s.x-view.tx)*factor; view.ty=s.y-(s.y-view.ty)*factor; view.s=ns; render(); }, {passive:false});
 
-  // ---- images -----------------------------------------------------------
-  function fileToImage(file){ return new Promise(function(res,rej){ var r=new FileReader();
-    r.onload=function(){ var im=new Image(); im.onload=function(){ res(im); }; im.onerror=rej; im.src=r.result; }; r.onerror=rej; r.readAsDataURL(file); }); }
-  // resize to a sane max dimension and re-encode (webp, jpeg fallback) so images
-  // are ~10-20x smaller than raw base64 — keeps IndexedDB + channel JSON light.
-  function compress(img){ var max=1600, sc=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
-    var w=Math.max(1,Math.round(img.naturalWidth*sc)), h=Math.max(1,Math.round(img.naturalHeight*sc));
-    var c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
-    var out=''; try{ out=c.toDataURL('image/webp',0.85); }catch(e){}
-    if(out.indexOf('data:image/webp')!==0){ out=c.toDataURL('image/jpeg',0.85); }
-    return { src:out, w:w, h:h }; }
-  function addImageFile(file, atWorld){
-    fileToImage(file).then(function(img){
-      var cmp=compress(img);
-      var max=340, sc=Math.min(1,max/Math.max(cmp.w,cmp.h)), w=cmp.w*sc, h=cmp.h*sc, c=atWorld||toWorld(W/2,H/2);
-      getImg(cmp.src);
-      snapshot(); mine.push({id:uid(),owner:me,type:'image',src:cmp.src,x:c.x-w/2,y:c.y-h/2,w:w,h:h}); commit();
-    }).catch(function(e){ console.warn('image failed', e); });
-  }
+  // ---- images: drop / paste / button -----------------------------------
   ['dragenter','dragover'].forEach(function(t){ window.addEventListener(t,function(e){ e.preventDefault(); }); });
-  window.addEventListener('drop', function(e){ e.preventDefault(); var s=evPos(e), w=toWorld(s.x,s.y), files=e.dataTransfer.files, off=0;
+  window.addEventListener('drop', function(e){ e.preventDefault(); if(!mySlot){ openSeatPicker(); return; }
+    var s=evPos(e), w=toWorld(s.x,s.y), files=e.dataTransfer.files, off=0;
     for(var i=0;i<files.length;i++){ if(/^image\//.test(files[i].type)){ addImageFile(files[i],{x:w.x+off,y:w.y+off}); off+=24; } } });
-  window.addEventListener('paste', function(e){ var items=e.clipboardData&&e.clipboardData.items; if(!items) return;
+  window.addEventListener('paste', function(e){ if(!mySlot) return; var items=e.clipboardData&&e.clipboardData.items; if(!items) return;
     for(var i=0;i<items.length;i++){ if(items[i].type.indexOf('image')===0){ var f=items[i].getAsFile(); if(f) addImageFile(f,null); } } });
 
-  // ---- fit --------------------------------------------------------------
   function fit(){ var objs=allObjects(); if(!objs.length){ view={s:1,tx:0,ty:0}; render(); return; }
     var b=bboxOf(objs[0]), minx=b.x,miny=b.y,maxx=b.x+b.w,maxy=b.y+b.h;
     objs.forEach(function(o){ var bb=bboxOf(o); minx=Math.min(minx,bb.x); miny=Math.min(miny,bb.y); maxx=Math.max(maxx,bb.x+bb.w); maxy=Math.max(maxy,bb.y+bb.h); });
@@ -480,7 +459,7 @@
   [].forEach.call(document.querySelectorAll('[data-tool]'),function(b){ b.addEventListener('click',function(){ setTool(b.dataset.tool); }); });
   document.getElementById('color').addEventListener('input',function(e){ color=e.target.value; });
   document.getElementById('width').addEventListener('input',function(e){ width=+e.target.value; });
-  document.getElementById('addImg').addEventListener('click',function(){ document.getElementById('fileImg').click(); });
+  document.getElementById('addImg').addEventListener('click',function(){ if(!mySlot){ openSeatPicker(); return; } document.getElementById('fileImg').click(); });
   document.getElementById('fileImg').addEventListener('change',function(e){ [].forEach.call(e.target.files,function(f){ if(/^image\//.test(f.type)) addImageFile(f,null); }); e.target.value=''; });
   document.getElementById('del').addEventListener('click',delSel);
   document.getElementById('undo').addEventListener('click',undo);
@@ -506,13 +485,12 @@
   // ---- boot -------------------------------------------------------------
   (async function(){
     await idbOpen(); resize(); updatePeers();
-    // silently reconnect to the remembered folder if still authorised
     try{
       var h=await idbGet('dirHandle');
-      if(h){ var perm = h.queryPermission ? await h.queryPermission({mode:'readwrite'}) : 'granted';
-        if(perm==='granted'){ dirHandle=h; try{ await readAll(); }catch(e){} } }
+      if(h){ var perm=h.queryPermission?await h.queryPermission({mode:'readwrite'}):'granted';
+        if(perm==='granted'){ dirHandle=h; try{ await initPool(); await readAll(); }catch(e){} } }
     }catch(e){}
-    openSeatPicker();   // every session: pick a seat (or select the folder first)
+    openSeatPicker();
   })();
 })();
 </script>
