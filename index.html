@@ -162,7 +162,7 @@
       <div class="slotgrid" id="slotgrid"></div>
     </div>
     <div id="modalfoot">
-      <span>Folder: <b id="folderName">none</b></span>
+      <span>Pool: <b id="folderName"></b></span>
       <button class="linkbtn" id="changefolder" style="display:none">Change folder</button>
     </div>
   </div>
@@ -451,7 +451,8 @@
   }
   function closeModal(){ homeView=false; document.getElementById('overlay').style.display='none'; if(window._lbPick){ clearInterval(window._lbPick); window._lbPick=null; } }
   function renderPicker(){
-    document.getElementById('folderName').textContent = dirHandle ? (dirHandle.name||'selected') : 'none';
+    document.getElementById('folderName').textContent = dirHandle ? (dirHandle.name||'selected') : '';
+    document.getElementById('modalfoot').style.display = dirHandle ? 'flex' : 'none';
     document.getElementById('changefolder').style.display = dirHandle ? 'inline' : 'none';
     document.getElementById('mclose').style.display = mySlot ? 'block' : 'none';
     var fp=document.getElementById('folderpick'), sw=document.getElementById('slotwrap');
