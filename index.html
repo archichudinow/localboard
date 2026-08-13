@@ -177,26 +177,36 @@
   }
   function getImg(src){ if(imgCache[src]) return imgCache[src]; var im=new Image(); im.onload=render; im.src=src; imgCache[src]=im; return im; }
 
-  // ---- local cache ------------------------------------------------------
-  function mineKey(){ return 'lb_mine_' + safe(myChannel||'local'); }
-  function saveLocal(){ try{ localStorage.setItem(mineKey(), JSON.stringify(mine)); }catch(e){} }
-  function loadLocal(){ try{ var s=localStorage.getItem(mineKey()); if(s) mine=JSON.parse(s)||[]; }catch(e){} }
+  // ---- local cache (IndexedDB — no ~5MB localStorage limit) -------------
+  var DB=null;
+  function idbOpen(){ return new Promise(function(res){ try{ var r=indexedDB.open('localboard',1);
+    r.onupgradeneeded=function(){ r.result.createObjectStore('boards'); };
+    r.onsuccess=function(){ DB=r.result; res(DB); }; r.onerror=function(){ res(null); }; }catch(e){ res(null); } }); }
+  function idbGet(k){ return new Promise(function(res){ if(!DB) return res(null); try{ var t=DB.transaction('boards','readonly').objectStore('boards').get(k); t.onsuccess=function(){ res(t.result||null); }; t.onerror=function(){ res(null); }; }catch(e){ res(null); } }); }
+  function idbSet(k,v){ return new Promise(function(res){ if(!DB) return res(); try{ var t=DB.transaction('boards','readwrite').objectStore('boards').put(v,k); t.onsuccess=function(){ res(); }; t.onerror=function(){ res(); }; }catch(e){ res(); } }); }
+
+  function mineKey(){ return 'mine:' + safe(myChannel||'local'); }
+  function saveLocal(){ idbSet(mineKey(), mine); }
+  async function loadLocal(){ var v=await idbGet(mineKey()); if(Array.isArray(v)) mine=v; }
 
   function snapshot(){ undoStack.push(JSON.stringify(mine)); if(undoStack.length>60) undoStack.shift(); }
   function undo(){ if(!undoStack.length) return; mine=JSON.parse(undoStack.pop()); sel=null; commit(); }
   function commit(){ saveLocal(); scheduleWrite(); render(); }
 
   // ---- shared folder (File System Access API) ---------------------------
-  var writeTimer=null;
+  var writeTimer=null, writing=false, writeAgain=false;
   function scheduleWrite(){ if(!dirHandle||!myChannel) return; clearTimeout(writeTimer); writeTimer=setTimeout(writeMine, 600); }
   async function writeMine(){
     if(!dirHandle||!myChannel) return;
+    if(writing){ writeAgain=true; return; }   // serialise: never open two writables on the same file
+    writing=true;
     try{
       var h=await dirHandle.getFileHandle(myChannel, {create:true});
       var w=await h.createWritable();
       await w.write(new Blob([JSON.stringify({user:me, channel:chanLabel(myChannel), t:Date.now(), objects:mine})],{type:'application/json'}));
       await w.close();
     }catch(e){ console.warn('write failed', e); }
+    finally{ writing=false; if(writeAgain){ writeAgain=false; writeMine(); } }
   }
   // read every board-*.json into folderIndex; returns it
   async function readAll(){
@@ -366,13 +376,24 @@
     var ns=Math.min(8,Math.max(0.05,view.s*factor)); factor=ns/view.s; view.tx=s.x-(s.x-view.tx)*factor; view.ty=s.y-(s.y-view.ty)*factor; view.s=ns; render(); }, {passive:false});
 
   // ---- images -----------------------------------------------------------
-  function addImageFile(file, atWorld){ var reader=new FileReader();
-    reader.onload=function(){ var src=reader.result, probe=new Image();
-      probe.onload=function(){ var max=340, sc=Math.min(1,max/Math.max(probe.naturalWidth,probe.naturalHeight));
-        var w=probe.naturalWidth*sc, h=probe.naturalHeight*sc, c=atWorld||toWorld(W/2,H/2); imgCache[src]=probe;
-        snapshot(); mine.push({id:uid(),owner:me,type:'image',src:src,x:c.x-w/2,y:c.y-h/2,w:w,h:h}); commit(); };
-      probe.src=src; };
-    reader.readAsDataURL(file); }
+  function fileToImage(file){ return new Promise(function(res,rej){ var r=new FileReader();
+    r.onload=function(){ var im=new Image(); im.onload=function(){ res(im); }; im.onerror=rej; im.src=r.result; }; r.onerror=rej; r.readAsDataURL(file); }); }
+  // resize to a sane max dimension and re-encode (webp, jpeg fallback) so images
+  // are ~10-20x smaller than raw base64 — keeps IndexedDB + channel JSON light.
+  function compress(img){ var max=1600, sc=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+    var w=Math.max(1,Math.round(img.naturalWidth*sc)), h=Math.max(1,Math.round(img.naturalHeight*sc));
+    var c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
+    var out=''; try{ out=c.toDataURL('image/webp',0.85); }catch(e){}
+    if(out.indexOf('data:image/webp')!==0){ out=c.toDataURL('image/jpeg',0.85); }
+    return { src:out, w:w, h:h }; }
+  function addImageFile(file, atWorld){
+    fileToImage(file).then(function(img){
+      var cmp=compress(img);
+      var max=340, sc=Math.min(1,max/Math.max(cmp.w,cmp.h)), w=cmp.w*sc, h=cmp.h*sc, c=atWorld||toWorld(W/2,H/2);
+      getImg(cmp.src);
+      snapshot(); mine.push({id:uid(),owner:me,type:'image',src:cmp.src,x:c.x-w/2,y:c.y-h/2,w:w,h:h}); commit();
+    }).catch(function(e){ console.warn('image failed', e); });
+  }
   ['dragenter','dragover'].forEach(function(t){ window.addEventListener(t,function(e){ e.preventDefault(); }); });
   window.addEventListener('drop', function(e){ e.preventDefault(); var s=evPos(e), w=toWorld(s.x,s.y), files=e.dataTransfer.files, off=0;
     for(var i=0;i<files.length;i++){ if(/^image\//.test(files[i].type)){ addImageFile(files[i],{x:w.x+off,y:w.y+off}); off+=24; } } });
@@ -427,7 +448,7 @@
   window.addEventListener('resize',resize);
 
   // ---- boot -------------------------------------------------------------
-  loadLocal(); resize(); updatePeers();
+  (async function(){ await idbOpen(); await loadLocal(); resize(); updatePeers(); })();
 })();
 </script>
 </body>
