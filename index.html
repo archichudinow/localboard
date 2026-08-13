@@ -168,7 +168,7 @@
   var view = { s:1, tx:0, ty:0 };
   var tool='select', color='#111827', width=3, sel=null;
   var imgCache={}, undoStack=[];
-  var dirHandle=null, scanning=false, folderIndex={};
+  var dirHandle=null, scanning=false, folderIndex={}, parsedCache={}, pendingResume=false;
 
   function allObjects(){
     var out = mine.slice();
@@ -213,9 +213,16 @@
     var idx={};
     for await (var entry of dirHandle.values()){
       if(entry.kind!=='file' || !/^board-.+\.json$/i.test(entry.name)) continue;
-      try{ var f=await entry.getFile(); var d=JSON.parse(await f.text());
-        idx[entry.name]={ user:d.user||chanLabel(entry.name), objects:Array.isArray(d.objects)?d.objects:[] };
-      }catch(e){ idx[entry.name]={ user:chanLabel(entry.name), objects:[] }; }
+      var fn=entry.name;
+      try{
+        var f=await entry.getFile();
+        var cached=parsedCache[fn];
+        if(cached && cached.lm===f.lastModified){ idx[fn]={ user:cached.user, objects:cached.objects }; continue; } // unchanged: skip re-parse
+        var d=JSON.parse(await f.text());
+        var rec={ user:d.user||chanLabel(fn), objects:Array.isArray(d.objects)?d.objects:[] };
+        parsedCache[fn]={ lm:f.lastModified, user:rec.user, objects:rec.objects };
+        idx[fn]=rec;
+      }catch(e){ idx[fn]={ user:chanLabel(fn), objects:[] }; }
     }
     folderIndex=idx; return idx;
   }
@@ -239,11 +246,25 @@
     try{
       dirHandle=await window.showDirectoryPicker({ mode:'readwrite', id:'localboard' });
       if(dirHandle.requestPermission){ var p=await dirHandle.requestPermission({mode:'readwrite'}); if(p!=='granted'){ dirHandle=null; return; } }
+      idbSet('dirHandle', dirHandle);   // remember folder so we can auto-reconnect on reload
       await readAll();
       if(myChannel && folderIndex[myChannel]){ adoptChannel(myChannel, true); startSync(); }
       else openChannelPicker();
     }catch(e){ /* cancelled */ }
   }
+  // Reconnect to the remembered folder without re-picking it.
+  async function resumeFolder(){
+    var h=await idbGet('dirHandle'); if(!h) return connectFolder();
+    try{
+      var p = h.requestPermission ? await h.requestPermission({mode:'readwrite'}) : 'granted';
+      if(p!=='granted'){ pendingResume=true; return; }
+      dirHandle=h; await readAll();
+      if(myChannel && folderIndex[myChannel]){ adoptChannel(myChannel, true); startSync(); }
+      else openChannelPicker();
+    }catch(e){ connectFolder(); }
+  }
+  function armResume(){ pendingResume=true; var b=document.getElementById('connect');
+    var tn=b.childNodes[b.childNodes.length-1]; if(tn) tn.nodeValue=' Resume sync'; }
 
   function adoptChannel(fn, keepMineIfNew){
     myChannel=fn; localStorage.setItem('lb_channel', fn);
@@ -260,7 +281,7 @@
   }
   function startSync(){
     setSyncUI(true);
-    if(!window._lbPoll) window._lbPoll=setInterval(function(){ syncNow(false); }, 2500);
+    if(!window._lbPoll) window._lbPoll=setInterval(function(){ syncNow(false); }, 1000);
     writeMine();
   }
   function setSyncUI(on){
@@ -419,7 +440,7 @@
   document.getElementById('del').addEventListener('click',delSel);
   document.getElementById('undo').addEventListener('click',undo);
   document.getElementById('fit').addEventListener('click',fit);
-  document.getElementById('connect').addEventListener('click',connectFolder);
+  document.getElementById('connect').addEventListener('click',function(){ if(pendingResume){ pendingResume=false; resumeFolder(); } else connectFolder(); });
   document.getElementById('syncnow').addEventListener('click',function(){ syncNow(true); });
   document.getElementById('chanchip').addEventListener('click',function(){ readAll().then(openChannelPicker); });
   document.getElementById('rename').addEventListener('click',function(){ var n=(prompt('Your name:',me)||'').trim(); if(!n) return; localStorage.setItem('lb_user',n); location.reload(); });
@@ -448,7 +469,20 @@
   window.addEventListener('resize',resize);
 
   // ---- boot -------------------------------------------------------------
-  (async function(){ await idbOpen(); await loadLocal(); resize(); updatePeers(); })();
+  (async function(){
+    await idbOpen(); await loadLocal(); resize(); updatePeers();
+    try{
+      var h=await idbGet('dirHandle');
+      if(h){
+        var perm = h.queryPermission ? await h.queryPermission({mode:'readwrite'}) : 'granted';
+        if(perm==='granted'){                       // still authorised → fully auto-reconnect
+          dirHandle=h; await readAll();
+          if(myChannel && folderIndex[myChannel]){ adoptChannel(myChannel, true); startSync(); }
+          else openChannelPicker();
+        } else { armResume(); }                       // needs one click to re-grant (browser security)
+      }
+    }catch(e){ console.warn('restore failed', e); }
+  })();
 })();
 </script>
 </body>
